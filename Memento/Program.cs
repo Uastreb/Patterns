@@ -1,9 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Memento
+﻿namespace Memento
 {
     internal class Program
     {
@@ -14,7 +9,6 @@ namespace Memento
             var tokenMachine = new TokenMachine();
             var token1 = new Token(111);
             var memento1 = tokenMachine.AddToken(token1);
-            token1.Value = 333;
             var token2 = new Token(112);
             var token3 = new Token(113);
             var token4 = new Token(114);
