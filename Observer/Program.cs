@@ -18,39 +18,53 @@
 
     public class Game
     {
-        public event EventHandler AttackUpdated;
+        public event EventHandler RatEnters, RatDies;
+        public event EventHandler<Rat> NotifyRat;
 
-        public void UpdateAttack()
+        public void FireRatEnters(object sender)
         {
-            AttackUpdated?.Invoke(this, EventArgs.Empty);
+            RatEnters?.Invoke(sender, EventArgs.Empty);
+        }
+
+        public void FireRatDies(object sender)
+        {
+            RatDies?.Invoke(sender, EventArgs.Empty);
+        }
+
+        public void FireNotifyRat(object sender, Rat whichRat)
+        {
+            NotifyRat?.Invoke(sender, whichRat);
         }
     }
 
     public class Rat : IDisposable
     {
-        private readonly Game _game;
-        private static int _ratCount = 0;
-
+        private readonly Game game;
         public int Attack = 1;
 
         public Rat(Game game)
         {
-            _game = game;
-            _ratCount++;
-            _game.AttackUpdated += UpdateAttack;
-            _game.UpdateAttack();
+            this.game = game;
+            game.RatEnters += (sender, args) =>
+            {
+                if (sender != this)
+                {
+                    ++Attack;
+                    game.FireNotifyRat(this, (Rat)sender);
+                }
+            };
+            game.NotifyRat += (sender, rat) =>
+            {
+                if (rat == this) ++Attack;
+            };
+            game.RatDies += (sender, args) => --Attack;
+            game.FireRatEnters(this);
         }
 
-        private void UpdateAttack(object sender, EventArgs e)
-        {
-            Attack = _ratCount;
-        }
 
         public void Dispose()
         {
-            _ratCount--;
-            _game.UpdateAttack();
-            _game.AttackUpdated -= UpdateAttack;
+            game.FireRatDies(this);
         }
     }
 }
